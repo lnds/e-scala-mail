@@ -53,7 +53,6 @@ package object mail {
         }
       }
 
-      // TODO Set authentication from your configuration, sys properties or w/e
       commonsMail.setHostName(_host)
       commonsMail.setSmtpPort(_port)
    
@@ -63,12 +62,9 @@ package object mail {
       mail.cc foreach (commonsMail.addCc(_))
       mail.bcc foreach (commonsMail.addBcc(_))
 
-      mail.bounce.foreach { bounce =>
-	println("bounce address")  
-        commonsMail.setBounceAddress(bounce)
-     }
      commonsMail.
         setFrom(mail.from._1, mail.from._2).
+	setBounceAddress(mail.bounce.getOrElse(mail.from._1)).
         setSubject(mail.subject).
         send()
     }
