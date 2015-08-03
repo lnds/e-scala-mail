@@ -1,10 +1,10 @@
-# Idiomatic Scala
-
-Mail Sent simple DSL
+# Scala DSL for mail dispatching
 
 Based on this beatiful code: https://gist.github.com/mariussoutier/3436111
 
+# Usage
 
+```scala
   import org.akarru.tools.mail._
 
   send a new Mail (
@@ -22,4 +22,4 @@ Based on this beatiful code: https://gist.github.com/mariussoutier/3436111
     message = "Do you like to time travel to 40 century?.",
     richMessage = "Please, come <blink>it's</blink> <strong>urgent!</strong>..."
   )
-
+```
