@@ -13,7 +13,7 @@ import java.util.Properties
 object Session {
 
   case class Builder(
-                      mailer: Mailer,
+                      server: Server,
                       _bounce: Option[String] = None,
                       _auth: Option[Boolean] = None,
                       _startTtls: Option[Boolean] = None,
@@ -44,7 +44,6 @@ object Session {
     def apply() = connect()
 
     def connect() = {
-      mailer.close()
       val session = MailSession.getInstance(new Properties {
         _debug.map(d => put("mail.smtp.debug", d.toString))
         _auth.map(a => put("mail.smtp.auth", a.toString))
@@ -62,7 +61,7 @@ object Session {
           }
       }.getOrElse(null))
       val transport = session.getTransport("smtp")
-      mailer.copy(_session = session, _transport = transport)
+      server.copy(_session = session, _transport = transport)
     }
 
   }

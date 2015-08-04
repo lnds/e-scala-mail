@@ -35,23 +35,23 @@ package object mailer {
                    attachment: Option[(java.io.File)] = None
                    )
 
-  object Mailer {
+  object Server {
 
     def apply(host: String, port: Int): Session.Builder =
-      Mailer().session.host(host).port(port)
+      Server().session.host(host).port(port)
   }
 
-  case class using(mailer:Mailer) {
+  case class using(mailer:Server) {
 
 
-    def apply(closure: (Mailer) => Unit) {
+    def apply(closure: (Server) => Unit) {
       mailer.open()
       closure(mailer)
       mailer.close()
     }
   }
 
-  case class Mailer(_session: MailSession = Defaults.session, _transport: Transport = Defaults.transport) {
+  case class Server(_session: MailSession = Defaults.session, _transport: Transport = Defaults.transport) {
 
 
     def session = Session.Builder(this)
@@ -68,7 +68,7 @@ package object mailer {
 
   object send {
 
-    def a(mail: Mail)(implicit mailer: Mailer, ec: ExecutionContext): Future[String] = {
+    def a(mail: Mail)(implicit mailer: Server, ec: ExecutionContext): Future[String] = {
 
       val msg = new MimeMessage(mailer._session)
 
@@ -99,7 +99,7 @@ package object mailer {
       msg.setSubject(mail.subject)
 
       Future {
-          mailer._transport.sendMessage(msg, msg.getAllRecipients)
+        mailer._transport.sendMessage(msg, msg.getAllRecipients)
           msg.getMessageID
       }
     }

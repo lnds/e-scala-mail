@@ -11,7 +11,7 @@ For bulk email (uses futures):
   import org.akarru.tools.mail._
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  using (Mailer("localhost", 25).connect()) { implicit mailer =>
+  using (Server("localhost", 25).connect()) { implicit server =>
 
     send a new Mail (
         from = "rena@akarru.com" -> "Rena",
