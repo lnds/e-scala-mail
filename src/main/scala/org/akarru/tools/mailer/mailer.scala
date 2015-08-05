@@ -32,77 +32,79 @@ package object mailer {
                    subject: String,
                    message: String,
                    richMessage: Option[String] = None,
-                   attachment: Option[(java.io.File)] = None
+                   attachment: Option[(java.io.File)] = None,
+                   headers : Seq[(String,String)] = Seq.empty[(String,String)]
                    )
 
-  object Server {
-
-    def apply(host: String, port: Int): Session.Builder =
-      Server().session.host(host).port(port)
-  }
-
-  case class using(mailer:Server) {
 
 
-    def apply(closure: (Server) => Unit) {
-      mailer.open()
-      closure(mailer)
-      mailer.close()
+  trait MailStatus
+  case class Failure(exception:Throwable) extends MailStatus
+  case class Success(id:String) extends MailStatus
+
+  class Mailer(server:Server) {
+
+    def open(): Unit = {
+      server.open()
     }
-  }
-
-  case class Server(_session: MailSession = Defaults.session, _transport: Transport = Defaults.transport) {
-
-
-    def session = Session.Builder(this)
 
     def close(): Unit = {
-      _transport.close()
+      server.close()
     }
 
-    def open() : Unit = {
-      _transport.connect()
-    }
+    object send {
 
-  }
+      def a(mail: Mail) : MailStatus = {
 
-  object send {
+        val msg = new MimeMessage(server._session)
 
-    def a(mail: Mail)(implicit mailer: Server, ec: ExecutionContext): Future[String] = {
+        val format =
+          if (mail.attachment.isDefined) MultiPart
+          else if (mail.richMessage.isDefined) Rich
+          else Plain
 
-      val msg = new MimeMessage(mailer._session)
+        format match {
+          case Plain => msg.setText(mail.message)
+          case Rich => msg.setContent(new MimeMultipart() {
+            addBodyPart(new MimeBodyPart {
+              setContent(mail.richMessage.get, "text/html")
+            })
+            addBodyPart(new MimeBodyPart {
+              setContent(mail.message, "text/plain")
+            })
+          })
+          case MultiPart => msg.setContent(new MimeMultipart() {
+            addBodyPart(new MimeBodyPart {
+              setContent(mail.richMessage.get, "text/html")
+            })
+            addBodyPart(new MimeBodyPart {
+              setContent(mail.message, "text/plain")
+            })
+            addBodyPart(new MimeBodyPart {
+              setDataHandler(new DataHandler(new FileDataSource(mail.attachment.get)))
+              setFileName(mail.attachment.get.getName)
+            })
+          })
+        }
 
-      val format =
-        if (mail.attachment.isDefined) MultiPart
-        else if (mail.richMessage.isDefined) Rich
-        else Plain
+        mail.to foreach (a => msg.addRecipient(Message.RecipientType.TO, new InternetAddress(a)))
+        mail.cc foreach (a => msg.addRecipient(Message.RecipientType.CC, new InternetAddress(a)))
+        mail.bcc foreach (a => msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(a)))
 
-      format match {
-        case Plain => msg.setText(mail.message)
-        case Rich => msg.setContent(new MimeMultipart() {
-                                          addBodyPart(new MimeBodyPart {setContent(mail.richMessage.get, "text/html")})
-                                          addBodyPart(new MimeBodyPart {setContent(mail.message, "text/plain")})
-                                     })
-        case MultiPart => msg.setContent(new MimeMultipart() {
-                                            addBodyPart(new MimeBodyPart {setContent(mail.richMessage.get, "text/html")})
-                                            addBodyPart(new MimeBodyPart {setContent(mail.message, "text/plain")})
-                                            addBodyPart(new MimeBodyPart {setDataHandler(new DataHandler(new FileDataSource(mail.attachment.get)))
-                                                                          setFileName(mail.attachment.get.getName)})
-                                          })
+        msg.setFrom(new InternetAddress(mail.from._1, mail.from._2))
+        msg.setSubject(mail.subject)
+
+        mail.headers.foreach(h => msg.addHeader(h._1, h._2))
+        server._transport.sendMessage(msg, msg.getAllRecipients)
+
+        try {
+          Success(msg.getMessageID)
+        } catch {
+          case ex:Throwable => Failure(ex)
+        }
       }
-
-      mail.to foreach (a => msg.addRecipient(Message.RecipientType.TO, new InternetAddress(a)))
-      mail.cc foreach (a => msg.addRecipient(Message.RecipientType.CC, new InternetAddress(a)))
-      mail.bcc foreach (a => msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(a)))
-
-      msg.setFrom(new InternetAddress(mail.from._1, mail.from._2))
-      msg.setSubject(mail.subject)
-
-      Future {
-        mailer._transport.sendMessage(msg, msg.getAllRecipients)
-          msg.getMessageID
-      }
     }
+
   }
 
 }

@@ -59,8 +59,9 @@ object Session {
             protected override def getPasswordAuthentication() =
               new PasswordAuthentication(user, pass)
           }
-      }.getOrElse(null))
+      }.orNull)
       val transport = session.getTransport("smtp")
+      transport.connect()
       server.copy(_session = session, _transport = transport)
     }
 
