@@ -22,7 +22,7 @@ object demo {
         case Failure(t) => println("fallido, razón: %s".format(t.getMessage))
       }
 
-      close()
+      server.close()
 
     }
 	}

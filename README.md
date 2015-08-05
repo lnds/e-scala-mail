@@ -19,6 +19,8 @@ For bulk email (uses futures):
         message = "Please, come it's urgent!",
         richMessage = "Please, come <blink>it's</blink> <strong>urgent!</strong>..."
     ) 
+    
+    server.close()
   }
 
 
@@ -41,7 +43,7 @@ If you want to capture the status:
         case Failure(t) => println("fallido, razón: ".format(t))
       }
 
-      close()
+      server.close()
 
     }
  ```

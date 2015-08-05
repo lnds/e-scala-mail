@@ -42,7 +42,7 @@ package object mailer {
   case class Failure(exception:Throwable) extends MailStatus
   case class Success(id:String) extends MailStatus
 
-  class Mailer(server:Server) {
+  class Mailer(val server:Server) {
 
     def open(): Unit = {
       server.open()
