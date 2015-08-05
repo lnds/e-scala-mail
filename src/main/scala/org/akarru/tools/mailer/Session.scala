@@ -39,7 +39,7 @@ object Session {
 
     def sslSocketFactory = socketFactory("javax.net.ssl.SSLSocketFactory")
 
-    def bounceAddress(bounce:String) = copy(_bounce=bounce)
+    def bounceAddress(bounce:Option[String]) = copy(_bounce=bounce)
 
     def apply() = connect()
 
