@@ -2,7 +2,7 @@ organization := "org.akarru"
 
 name := """e-scala-mail"""
 
-version := "0.1.2"
+version := "0.1.3"
 
 description := "deliver electronic email with scala using fancy DSL"
 

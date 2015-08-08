@@ -44,14 +44,6 @@ package object mailer {
 
   class Mailer(val server:Server) {
 
-    def open(): Unit = {
-      server.open()
-    }
-
-    def close(): Unit = {
-      server.close()
-    }
-
     object send {
 
       def a(mail: Mail) : MailStatus = {
@@ -95,7 +87,7 @@ package object mailer {
         msg.setSubject(mail.subject)
 
         mail.headers.foreach(h => msg.addHeader(h._1, h._2))
-        server._transport.sendMessage(msg, msg.getAllRecipients)
+        Transport.send(msg)
 
         try {
           Success(msg.getMessageID)
