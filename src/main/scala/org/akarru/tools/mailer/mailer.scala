@@ -30,6 +30,7 @@ package object mailer {
                    cc: Seq[String] = Seq.empty,
                    bcc: Seq[String] = Seq.empty,
                    subject: String,
+                   encoding: Option[String] = None,
                    message: Option[String],
                    richMessage: Option[String] = None,
                    attachment: Option[(java.io.File)] = None,
@@ -92,7 +93,7 @@ package object mailer {
         mail.bcc foreach (a => msg.addRecipient(Message.RecipientType.BCC, new InternetAddress(a)))
 
         msg.setFrom(new InternetAddress(mail.from._1, mail.from._2))
-        msg.setSubject(mail.subject)
+        msg.setSubject(mail.subject, mail.encoding.getOrElse("utf-8"))
 
         mail.headers.foreach(h => msg.addHeader(h._1, h._2))
         Transport.send(msg)

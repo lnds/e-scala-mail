@@ -13,7 +13,7 @@ object demo {
       send a new Mail(
         from = "rena@akarru.com" -> "Rena",
         to = Seq("mampato@akarru.com", "ogu@akarru.com"),
-        subject = "Help!",
+        subject = "Help! Ayúdame niño!",
         message = "Please, come it's urgent!",
         richMessage = "Please, come <blink>it's</blink> <strong>urgent!</strong>..."
       )
