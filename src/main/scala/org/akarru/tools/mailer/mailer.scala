@@ -30,7 +30,7 @@ package object mailer {
                    cc: Seq[String] = Seq.empty,
                    bcc: Seq[String] = Seq.empty,
                    subject: String,
-                   message: String,
+                   message: Option[String],
                    richMessage: Option[String] = None,
                    attachment: Option[(java.io.File)] = None,
                    headers : Seq[(String,String)] = Seq.empty[(String,String)]
@@ -56,22 +56,30 @@ package object mailer {
           else Plain
 
         format match {
-          case Plain => msg.setText(mail.message)
+          case Plain => msg.setText(mail.message.orNull)
           case Rich => msg.setContent(new MimeMultipart() {
-            addBodyPart(new MimeBodyPart {
-              setContent(mail.richMessage.get, "text/html")
-            })
-            addBodyPart(new MimeBodyPart {
-              setContent(mail.message, "text/plain")
-            })
+            mail.richMessage.foreach { richMessage =>
+              addBodyPart(new MimeBodyPart {
+                setContent(richMessage, "text/html")
+              })
+            }
+            mail.message.foreach { message =>
+              addBodyPart(new MimeBodyPart {
+                setContent(message, "text/plain")
+              })
+            }
           })
           case MultiPart => msg.setContent(new MimeMultipart() {
-            addBodyPart(new MimeBodyPart {
-              setContent(mail.richMessage.get, "text/html")
-            })
-            addBodyPart(new MimeBodyPart {
-              setContent(mail.message, "text/plain")
-            })
+            mail.richMessage.foreach {  richMessage =>
+              addBodyPart(new MimeBodyPart {
+                setContent(richMessage, "text/html")
+              })
+            }
+            mail.message.foreach { message =>
+              addBodyPart(new MimeBodyPart {
+                setContent(mail.message, "text/plain")
+              })
+            }
             addBodyPart(new MimeBodyPart {
               setDataHandler(new DataHandler(new FileDataSource(mail.attachment.get)))
               setFileName(mail.attachment.get.getName)
