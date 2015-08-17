@@ -96,9 +96,9 @@ package object mailer {
         msg.setSubject(mail.subject, mail.encoding.getOrElse("utf-8"))
 
         mail.headers.foreach(h => msg.addHeader(h._1, h._2))
-        Transport.send(msg)
 
         try {
+          Transport.send(msg)
           Success(msg.getMessageID)
         } catch {
           case ex:Throwable => Failure(ex)
