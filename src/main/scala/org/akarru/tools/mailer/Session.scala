@@ -60,7 +60,9 @@ object Session {
               new PasswordAuthentication(user, pass)
           }
       }.orNull)
-      server.copy(_session = session)
+      val transport = session.getTransport("smtp")
+      transport.connect()
+      server.copy(_session = session, _transport = transport)
     }
 
   }

@@ -98,7 +98,7 @@ package object mailer {
         mail.headers.foreach(h => msg.addHeader(h._1, h._2))
 
         try {
-          Transport.send(msg)
+          server._transport.sendMessage(msg, msg.getAllRecipients)
           Success(msg.getMessageID)
         } catch {
           case ex:Throwable => Failure(ex)
