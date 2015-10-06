@@ -8,8 +8,9 @@ object demo {
 
 	def main(args: Array[String]): Unit = {
 
-    new Mailer(Server("localhost", 1025).bounceAddress("bounces@akarru.com").connect()) {
-
+    val server = Server("localhost", 1025).bounceAddress("bounces@akarru.com")
+    new Mailer(server.connect()) {
+      server.open()
       send a new Mail(
         from = "rena@akarru.com" -> "Rena",
         to = Seq("mampato@akarru.com", "ogu@akarru.com"),
@@ -21,7 +22,7 @@ object demo {
         case Success(id) => println("enviado con exito id: %s".format(id))
         case Failure(t) => println("fallido, razón: %s".format(t.getMessage))
       }
-
+      server.close()
     }
 	}
 }

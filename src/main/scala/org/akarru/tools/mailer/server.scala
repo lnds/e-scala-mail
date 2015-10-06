@@ -16,6 +16,7 @@ object Server {
 case class Server(_session: MailSession = Defaults.session) {
 
 
+  val protocol = "smtp"
   var _transport : Transport = null
 
   def session = Session.Builder(this)
@@ -37,7 +38,7 @@ case class Server(_session: MailSession = Defaults.session) {
   }
 
   def open() : Unit = {
-    _transport = _session.getTransport
+    _transport = _session.getTransport(protocol)
     if (_transport != null)
       _transport.connect()
   }
